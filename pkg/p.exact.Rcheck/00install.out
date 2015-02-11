@@ -1,0 +1,24 @@
+
+************************************************************************************
+
+Hi xia! Welcome to R version 3.1.2 Patched (2014-12-03 r67103) - "Pumpkin Helmet" :)
+
+************************************************************************************
+
+
+Attaching package: ‘MASS’
+
+The following object is masked _by_ ‘.GlobalEnv’:
+
+    write.matrix
+
+* installing *source* package ‘p.exact’ ...
+** R
+** data
+** inst
+** preparing package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded
+* DONE (p.exact)

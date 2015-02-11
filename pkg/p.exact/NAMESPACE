@@ -1,0 +1,2 @@
+import("GenABEL", "svMisc")
+export("p.exact.gaussian", "p.exact.binary")

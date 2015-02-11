@@ -1,0 +1,19 @@
+citHeader("To cite the package p.exact in publications use:")
+
+citEntry(entry="Article",
+         title = "Beyond permutation test: calculating exact dataset-specific p-values for genome-wide association studies in inbred populations",
+         author = personList(as.person("Xia Shen")),
+         journal      = "Submitted",
+         year         = "2015",
+         volume       = "0",
+         number       = "0",
+         pages        = "0-0",
+         url          = "http://",
+         
+         textVersion = 
+         paste("Xia Shen (2015)", 
+               "Beyond permutation test: calculating exact dataset-specific p-values for genome-wide association studies in inbred populations",
+               "Submitted",
+               "URL http://")
+)
+

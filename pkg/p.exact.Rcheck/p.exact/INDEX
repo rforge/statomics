@@ -1,0 +1,4 @@
+arab                                                  Arabidopsis thaliana data set from Atwell et al. 2010 _Nature_
+p.exact                                               Exact p-values
+p.exact.binary                                        Exact p-values for genome-wide association analysis of case-control data in inbred populations
+p.exact.gaussian                                      Exact p-values for genome-wide association analysis in inbred populations

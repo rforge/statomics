@@ -1,0 +1,127 @@
+
+R version 3.1.2 Patched (2014-12-03 r67103) -- "Pumpkin Helmet"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "p.exact"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> base::assign(".ExTimings", "p.exact-Ex.timings", pos = 'CheckExEnv')
+> base::cat("name\tuser\tsystem\telapsed\n", file=base::get(".ExTimings", pos = 'CheckExEnv'))
+> base::assign(".format_ptime",
++ function(x) {
++   if(!is.na(x[4L])) x[1L] <- x[1L] + x[4L]
++   if(!is.na(x[5L])) x[2L] <- x[2L] + x[5L]
++   options(OutDec = '.')
++   format(x[1L:3L], digits = 7L)
++ },
++ pos = 'CheckExEnv')
+> 
+> ### * </HEADER>
+> library('p.exact')
+Loading required package: GenABEL
+Loading required package: MASS
+Loading required package: GenABEL.data
+Loading required package: svMisc
+
+p.exact: Exact P-values for Genome-Wide Association Analyses in Inbred Populations
+Version 0.1-0 (2015-02-04) installed
+Author: Xia Shen
+Maintainer: Xia Shen <xia.shen@ki.se>
+
+Use citation("p.exact") to know how to cite this work.
+
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("p.exact.binary")
+> ### * p.exact.binary
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: p.exact.binary
+> ### Title: Exact p-values for genome-wide association analysis of
+> ###   case-control data in inbred populations
+> ### Aliases: p.exact p.exact.binary
+> ### Keywords: discovery exact false genome-wide p-value, p.exact, rate
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D ## loading example gwaa.data of data from Atwell et al. (2010) Nature
+> ##D data(arab)
+> ##D 
+> ##D ## running a regular GWA analysis for AvrRPM1
+> ##D cc1 <- ccfast('X33_.i.avrRpm1..i.', data = arab)
+> ##D 
+> ##D ## check the top finding using the exact p-value
+> ##D top <- which.min(cc1[,'P1df'])
+> ##D or <- cc1[top,'effB']
+> ##D f <- summary(arab[,top])$Q.2
+> ##D maf <- min(f, 1 - f)
+> ##D exact <- p.exact.binary(pheno = 'X33_.i.avrRpm1..i.', gwaa.object = arab, or = or, or.maf = maf, con.table = 'tab.AvrRPM1.RData')
+> ## End(Not run)
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("p.exact.binary", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("p.exact.gaussian")
+> ### * p.exact.gaussian
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: p.exact.gaussian
+> ### Title: Exact p-values for genome-wide association analysis in inbred
+> ###   populations
+> ### Aliases: p.exact p.exact.gaussian
+> ### Keywords: discovery exact false genome-wide p-value, p.exact, rate
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D ## loading example gwaa.data in GenABEL
+> ##D data(ge03d2ex.clean)
+> ##D 
+> ##D ## running a regular GWA analysis for height
+> ##D qt1 <- qtscore(height, data = ge03d2ex.clean)
+> ##D 
+> ##D ## running the multivariate GWAS again
+> ##D exact <- p.exact.gaussian(ge03d2ex.clean, beta = qt1[,'effB'])
+> ## End(Not run)
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("p.exact.gaussian", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> ### * <FOOTER>
+> ###
+> options(digits = 7L)
+> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+Time elapsed:  0.603 0.01 0.624 0 0 
+> grDevices::dev.off()
+null device 
+          1 
+> ###
+> ### Local variables: ***
+> ### mode: outline-minor ***
+> ### outline-regexp: "\\(> \\)?### [*]+" ***
+> ### End: ***
+> quit('no')
