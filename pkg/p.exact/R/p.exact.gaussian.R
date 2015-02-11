@@ -37,7 +37,7 @@
 #' data(arab)
 #' 
 #' ## running a regular GWA analysis for height
-#' y <- qnorm((rank(arab@phdata$X1_LD, na.last = "keep") - 0.5)/sum(!is.na(arab@phdata$X1_LD)))
+#' y <- qnorm((rank(phdata(arab)$X1_LD, na.last = "keep") - 0.5)/sum(!is.na(phdata(arab)$X1_LD)))
 #' qt1 <- qtscore(y, data = arab)
 #' 
 #' ## running the multivariate GWAS again

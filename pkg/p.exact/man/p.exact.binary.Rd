@@ -4,7 +4,7 @@
 \title{Exact p-values for genome-wide association analysis of case-control data in inbred populations}
 \usage{
 p.exact.binary(pheno, gwaa.object, or = NULL, or.maf = NULL,
-  low.maf = 0.05, high.ld = 0.9, method = "logOR", type = "two-sided",
+  low.maf = 0.05, high.ld = 1, method = "logOR", type = "two-sided",
   con.table = NULL)
 }
 \arguments{
@@ -56,10 +56,13 @@ cc1 <- ccfast('X33_.i.avrRpm1..i.', data = arab)
 
 ## check the top finding using the exact p-value
 top <- which.min(cc1[,'P1df'])
-or <- cc1[top,'effB']
+ctab <- table(phdata(arab)$X33_.i.avrRpm1..i., as.double(arab[,top]))
+ctab[ctab == 0] <- ctab[ctab == 0] + .5
+or <- ctab[1,1]*ctab[2,2]/ctab[2,1]/ctab[1,2]
 f <- summary(arab[,top])$Q.2
 maf <- min(f, 1 - f)
-exact <- p.exact.binary(pheno = 'X33_.i.avrRpm1..i.', gwaa.object = arab, or = or, or.maf = maf, con.table = 'tab.AvrRPM1.RData')
+exact <- p.exact.binary(pheno = 'X33_.i.avrRpm1..i.', gwaa.object = arab,
+         or = or, or.maf = maf, con.table = 'tab.AvrRPM1.RData')
 }
 }
 \author{

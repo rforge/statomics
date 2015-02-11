@@ -46,7 +46,7 @@
 #' 
 #' ## check the top finding using the exact p-value
 #' top <- which.min(cc1[,'P1df'])
-#' ctab <- table(arab@phdata$X33_.i.avrRpm1..i., as.double(arab[,top]))
+#' ctab <- table(phdata(arab)$X33_.i.avrRpm1..i., as.double(arab[,top]))
 #' ctab[ctab == 0] <- ctab[ctab == 0] + .5
 #' or <- ctab[1,1]*ctab[2,2]/ctab[2,1]/ctab[1,2]
 #' f <- summary(arab[,top])$Q.2

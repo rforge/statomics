@@ -40,14 +40,15 @@ None.
 }
 \examples{
 \dontrun{
-## loading example gwaa.data in GenABEL
-data(ge03d2ex.clean)
+## loading example gwaa.data of data from Atwell et al. (2010) Nature
+data(arab)
 
 ## running a regular GWA analysis for height
-qt1 <- qtscore(height, data = ge03d2ex.clean)
+y <- qnorm((rank(phdata(arab)$X1_LD, na.last = "keep") - 0.5)/sum(!is.na(phdata(arab)$X1_LD)))
+qt1 <- qtscore(y, data = arab)
 
 ## running the multivariate GWAS again
-exact <- p.exact.gaussian(ge03d2ex.clean, beta = qt1[,'effB'])
+exact <- p.exact.gaussian(arab, beta = qt1[,'effB'])
 }
 }
 \author{
