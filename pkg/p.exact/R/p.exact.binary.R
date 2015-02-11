@@ -58,7 +58,7 @@
 #' @keywords p.exact, exact p-value, genome-wide false discovery rate
 #' 
 
-`p.exact.binary` <- function(pheno, gwaa.object, or = NULL, or.maf = NULL, low.maf = .05, high.ld = .9, method = 'logOR', type = 'two-sided', con.table = NULL) {
+`p.exact.binary` <- function(pheno, gwaa.object, or = NULL, or.maf = NULL, low.maf = .05, high.ld = 1, method = 'logOR', type = 'two-sided', con.table = NULL) {
 	if (is.character(pheno)) {
 		y <- gwaa.object@phdata[,pheno]
 	} else {
@@ -202,6 +202,8 @@
 	}
 	cat('\n')
 	res <- data.frame(or = or, MAF = or.maf, p.exact = p)
-	rownames(res) <- gtdata(gwaa.object)@snpnames
+	if (nrow(res) == length(allfreq) {
+		rownames(res) <- gtdata(gwaa.object)@snpnames
+	}
 	return(res)
 }
