@@ -202,7 +202,7 @@
 	}
 	cat('\n')
 	res <- data.frame(or = or, MAF = or.maf, p.exact = p)
-	if (nrow(res) == length(allfreq) {
+	if (nrow(res) == length(allfreq)) {
 		rownames(res) <- gtdata(gwaa.object)@snpnames
 	}
 	return(res)
