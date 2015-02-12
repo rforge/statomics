@@ -111,7 +111,7 @@
 	for (j in idx) {
 		tabj <- c(table(y, Z[,j]))
 		tabj[tabj == 0] <- tabj[tabj == 0] + .5
-		allor[j] <- tabj[1]*tabj[4] - tabj[2]*tabj[3]
+		allor[j] <- tabj[1]*tabj[4]/tabj[2]/tabj[3]
 	}
 	if (is.null(or) | is.null(or.maf)) {
 		or <- allor
