@@ -44,7 +44,8 @@ None.
 data(arab)
 
 ## running a regular GWA analysis for long-day flowering time
-y <- qnorm((rank(phdata(arab)$X1_LD, na.last = "keep") - 0.5)/sum(!is.na(phdata(arab)$X1_LD)))
+y <- phdata(arab)$X1_LD
+y <- qnorm((rank(y, na.last = "keep") - 0.5)/sum(!is.na(y)))
 qt1 <- qtscore(y, data = arab)
 
 ## calculating all the exact p-values for the whole genome markers

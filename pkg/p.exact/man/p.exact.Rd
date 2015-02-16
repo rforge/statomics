@@ -42,12 +42,11 @@ Xia Shen
 \references{
 If you use p.exact package in your analysis, please cite the following work:
 
-Xia Shen (2015).
-Beyond permutation test: calculating exact dataset-specific p-values for
+Xia Shen (2015). Flaw or discovery? Calculating exact p-values for
 genome-wide association studies in inbred populations. \emph{Submitted}.
 }
 \seealso{
-\code{GenABEL}
+\code{p.exact.gaussian}, \code{p.exact.binary}
 }
 \keyword{package}
 
