@@ -1,8 +1,8 @@
 Package: p.exact
 Type: Package
 Title: Exact P-values for Genome-Wide Association Analyses in Inbred Populations
-Version: 0.1-0
-Date: 2015-02-04
+Version: 0.1-1
+Date: 2015-02-16
 Author: Xia Shen
 Maintainer: Xia Shen <xia.shen@ki.se>
 Description: This package implements for calculating exact dataset-specific
@@ -14,4 +14,4 @@ Depends:
     svMisc
 License: GPL (>= 2)
 LazyLoad: yes
-Packaged: 2015-02-04 16:29:18 GMT; xia
+Packaged: 2015-02-16 21:38:18 CET; xia
