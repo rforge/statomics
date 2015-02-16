@@ -55,6 +55,8 @@ data(arab)
 cc1 <- ccfast('X33_.i.avrRpm1..i.', data = arab)
 
 ## check the top finding using the exact p-value
+## con.table is calculated when running the first time
+## rerunning for checking other markers will be fast
 top <- which.min(cc1[,'P1df'])
 ctab <- table(phdata(arab)$X33_.i.avrRpm1..i., as.double(arab[,top]))
 ctab[ctab == 0] <- ctab[ctab == 0] + .5
@@ -69,8 +71,8 @@ exact <- p.exact.binary(pheno = 'X33_.i.avrRpm1..i.', gwaa.object = arab,
 Xia Shen
 }
 \references{
-Xia Shen (2015). Beyond permutation test: calculating exact dataset-specific p-values
-for genome-wide association studies in inbred populations. \emph{Submitted}.
+Xia Shen (2015). Flaw or discovery? Calculating exact p-values for
+genome-wide association studies in inbred populations. \emph{Submitted}.
 }
 \seealso{
 \code{\link{ccfast}}, \code{\link{glm}}

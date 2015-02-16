@@ -43,11 +43,11 @@ None.
 ## loading example gwaa.data of data from Atwell et al. (2010) Nature
 data(arab)
 
-## running a regular GWA analysis for height
+## running a regular GWA analysis for long-day flowering time
 y <- qnorm((rank(phdata(arab)$X1_LD, na.last = "keep") - 0.5)/sum(!is.na(phdata(arab)$X1_LD)))
 qt1 <- qtscore(y, data = arab)
 
-## running the multivariate GWAS again
+## calculating all the exact p-values for the whole genome markers
 exact <- p.exact.gaussian(arab, beta = qt1[,'effB'])
 }
 }
@@ -55,8 +55,8 @@ exact <- p.exact.gaussian(arab, beta = qt1[,'effB'])
 Xia Shen
 }
 \references{
-Xia Shen (2015). Beyond permutation test: calculating exact dataset-specific p-values
-for genome-wide association studies in inbred populations. \emph{Submitted}.
+Xia Shen (2015). Flaw or discovery? Calculating exact p-values for
+genome-wide association studies in inbred populations. \emph{Submitted}.
 }
 \seealso{
 \code{\link{qtscore}}, \code{\link{t.test}}
