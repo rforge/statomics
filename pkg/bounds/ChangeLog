@@ -1,0 +1,11 @@
+2015-03-04 16:26  xia
+
+    * Update to version 0.1-2
+    * internal glm prediction fixed for case-control study
+    * example data file updated to better naming
+    * 
+
+2015-03-04 16:26  xia
+
+    * bounds packaged! Initial version 0.1-1
+      	

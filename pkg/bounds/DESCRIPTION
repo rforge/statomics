@@ -1,0 +1,16 @@
+Package: bounds
+Type: Package
+Title: Bounds for causal and sufficient-cause interactions
+Version: 0.1-2
+Date: 2015-03-10
+Author: Arvid Sjolander, Xia Shen
+Maintainer: Xia Shen <xia.shen@ki.se>
+Description: This package contains functions for estimating bounds of causal
+    interactions and sufficient-cause interactions. Standard errors are also
+    estimated via bootstrap.
+Depends:
+    R (>= 2.10),
+    rje
+License: GPL (>= 2)
+LazyLoad: yes
+Packaged: 2015-03-10 12:38:18 CET; xia
