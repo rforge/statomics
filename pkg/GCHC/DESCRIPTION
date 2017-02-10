@@ -1,0 +1,9 @@
+Package: GCHC
+Type: Package
+Title: Genetic Correlation Heterogeneity for Causality (GCHC)
+Version: 1.0
+Date: 2017-02-10
+Author: Xia Shen
+Maintainer: Xia Shen <xia.shen@ed.ac.uk>
+Description: Testing the difference between genetic correlation estimates reported by LD Score regression (LDSC), to infer causality.
+License: GPL (>= 3)
