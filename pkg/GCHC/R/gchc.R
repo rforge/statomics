@@ -89,7 +89,7 @@ function(rg1.log = NULL,
     cat('Difference in genetic correlation:', round(b, digits = 3), '\n')
     cat('Standard error:', round(s, digits = 3), '\n')
     cat('P:', pv, '*\n')
-    cat('* Small P suggests causality exists from', exposure, '(or its proxy) to', outcome, '.\n\n')
+    cat('* Small P suggests causality exists from', exposure, 'to', outcome, '.\n\n')
     cat('Analysis finished at', date(), '\n')
     cat('Total time elapsed:', t1 - t0, 's\n')
     return(list(rg.diff = b, se = s, p.value = pv, r.rg = rzz))
