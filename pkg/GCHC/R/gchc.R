@@ -1,3 +1,50 @@
+#' Genetic Correlation Heterogeneity for Causality (GCHC)
+#' 
+#' This function tests the difference between genetic correlation estimates 
+#' reported by LD Score regression (LDSC), to infer causality.
+#' 
+#' @param rg1.log LDSC log file for the 1st genetic correlation estimation between the exposure and outcome phenotypes.
+#' @param rg2.log LDSC log file for the 2nd genetic correlation estimation between the exposure and outcome phenotypes.
+#' @param exposure.sumstats The gzipped file of exposure phenotype GWAS summary statistics, munged by LDSC.
+#' @param outcome.sumstats1 The gzipped file of outcome phenotype GWAS (1st population) summary statistics, munged by LDSC.
+#' @param outcome.sumstats2 The gzipped file of outcome phenotype GWAS (2nd population) summary statistics, munged by LDSC.
+#' @param exposure Name of the exposure phenotype.
+#' @param outcome Name of the outcome phenotype.
+#' @param heading logical value that specified whether the software intro heading is printed.
+#' 
+#' @note GWAS of the exposure phenotype is required to be done in only one population, to keep its heritability fixed. 
+#' Two different populations/sources are required for GWAS of the outcome phenotype.
+#' 
+#' @return A list is returned with:
+#' \itemize{
+#' \item{rg.diff }{The estimated difference between two genetic correlation estimates.}
+#' \item{se }{The standard error of \code{rg.diff}.}
+#' \item{p.value }{The p-value testing the null hypothesis of \code{rg.diff} = 0.}
+#' \item{r.rg }{The estimated correlation between two genetic correlation estimates.}
+#' }
+#' 
+#' @author Xia Shen
+#' 
+#' @references 
+#' Shen X, Ning Z, Joshi PK, Lee Y, Wilson JF, Pawitan Y (2017). Genetic correlation heterogeneity detects causal factors
+#' for complex traits. \emph{Submitted}.
+#' 
+#' @seealso 
+#' GCHC homepage: http://gchc.shen.se
+#' 
+#' @examples 
+#' \dontrun{
+#' gchc(rg1.log = 'EDU_BMI1.log', 
+#'                 rg2.log = 'EDU_BMI2.log', 
+#'                 exposure.sumstats = 'EDU.sumstats.gz', 
+#'                 outcome.sumstats1 = 'BMI1.sumstats.gz',
+#'                 outcome.sumstats2 = 'BMI2.sumstats.gz',
+#'                 exposure = 'EA', 
+#'                 outcome = 'BMI')
+#' }
+#' @aliases gchc
+#' @keywords causal inference, genetic correlation
+#' 
 gchc <-
 function(rg1.log = NULL, 
                 rg2.log = NULL, 
@@ -10,18 +57,12 @@ function(rg1.log = NULL,
 {
     ## startup
 	if (heading) {
-	    cat('*********************************************************************\n')
-	    cat('* Genetic Correlation Heterogeneity for Causality (GCHC)\n')
-	    cat('* Version 1.0.0\n')
-	    cat('* (C) 2017 Xia Shen\n')
-	    cat('* Usher Institute of Univ. Edinburgh / MEB of Karolinska Institutet\n')
-	    cat('* GNU General Public License v3\n')
-	    cat('*********************************************************************\n\n')
+	    print.heading()
+    	cc <- match.call()
+    	cat('Call:\n')
+    	print(cc)
+    	cat('\n')
 	}
-    cc <- match.call()
-    cat('Call:\n')
-    print(cc)
-    cat('\n')
     t0 <- as.numeric(proc.time()[3])
     ## check input
     if (any(is.null(c(rg1.log, rg2.log)))) {
