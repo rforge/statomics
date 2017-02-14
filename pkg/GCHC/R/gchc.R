@@ -5,16 +5,19 @@ function(rg1.log = NULL,
                 outcome.sumstats1 = NULL,
                 outcome.sumstats2 = NULL,
                 exposure = 'Exposure', 
-                outcome = 'Outcome')
+                outcome = 'Outcome',
+				heading = TRUE)
 {
     ## startup
-    cat('*********************************************************************\n')
-    cat('* Genetic Correlation Heterogeneity for Causality (GCHC)\n')
-    cat('* Version 1.0.0\n')
-    cat('* (C) 2017 Xia Shen\n')
-    cat('* Usher Institute of Univ. Edinburgh / MEB of Karolinska Institutet\n')
-    cat('* GNU General Public License v3\n')
-    cat('*********************************************************************\n\n')
+	if (heading) {
+	    cat('*********************************************************************\n')
+	    cat('* Genetic Correlation Heterogeneity for Causality (GCHC)\n')
+	    cat('* Version 1.0.0\n')
+	    cat('* (C) 2017 Xia Shen\n')
+	    cat('* Usher Institute of Univ. Edinburgh / MEB of Karolinska Institutet\n')
+	    cat('* GNU General Public License v3\n')
+	    cat('*********************************************************************\n\n')
+	}
     cc <- match.call()
     cat('Call:\n')
     print(cc)
