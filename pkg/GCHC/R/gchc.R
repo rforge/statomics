@@ -66,13 +66,13 @@ function(rg1.log = NULL,
     if (indep) {
         s <- sqrt(serg1**2 + serg2**2)
         rzz <- 0
-        cat('No munged summary statistics given, genetic correlation estimates are assumed independent.\n')
+        cat('No munged summary statistics given, genetic correlations are assumed independent.\n')
     } else {
         c11 <- read.sumstats(outcome.sumstats1)
         c21 <- read.sumstats(outcome.sumstats2)
         ss <- read.sumstats(exposure.sumstats)
         snps <- ss$SNP[ss$SNP %in% c11$SNP & ss$SNP %in% c21$SNP]
-        cat(length(snps), 'variants were used to estimate the correlation between genetic correlation estimates.\n')
+        cat(length(snps), 'variants to estimate the correlation between genetic correlation estimates.\n')
         zz1 <- ss[snps,'Z']*c11[snps,'Z']*(1 - 2*(ss[snps,'A1'] != c11[snps,'A1']))
         zz2 <- ss[snps,'Z']*c21[snps,'Z']*(1 - 2*(ss[snps,'A1'] != c21[snps,'A1']))
         rzz <- cor(zz1, zz2, use = 'pairwise.complete.obs')
@@ -89,7 +89,7 @@ function(rg1.log = NULL,
     cat('Difference in genetic correlation:', round(b, digits = 3), '\n')
     cat('Standard error:', round(s, digits = 3), '\n')
     cat('P:', pv, '*\n')
-    cat('* Small P suggests causality exists from', exposure, 'to', outcome, '.\n\n')
+    cat('* Small P suggests causality exists from', exposure, 'to', outcome, '\n\n')
     cat('Analysis finished at', date(), '\n')
     cat('Total time elapsed:', t1 - t0, 's\n')
     return(list(rg.diff = b, se = s, p.value = pv, r.rg = rzz))
