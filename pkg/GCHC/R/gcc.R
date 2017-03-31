@@ -1,4 +1,4 @@
-#' Genetic Correlation Heterogeneity for Causality (GCHC)
+#' Genetic Correlation heterogeneity test for Causality (GCC)
 #' 
 #' This function tests the difference between genetic correlation estimates 
 #' reported by LD Score regression (LDSC), to infer causality.
@@ -26,11 +26,11 @@
 #' @author Xia Shen
 #' 
 #' @references 
-#' Shen X, Ning Z, Joshi PK, Lee Y, Wilson JF, Pawitan Y (2017). Genetic correlation heterogeneity detects causal factors
+#' Shen X, Ning Z, Joshi PK, Lee Y, Wilson JF, Pawitan Y (2017). Heterogeneity in genetic correlation detects causal factors
 #' for complex traits. \emph{Submitted}.
 #' 
 #' @seealso 
-#' GCHC homepage: http://gchc.shen.se
+#' GCC homepage: http://gcc.shen.se
 #' 
 #' @examples 
 #' \dontrun{
@@ -42,10 +42,10 @@
 #'                 exposure = 'EA', 
 #'                 outcome = 'BMI')
 #' }
-#' @aliases gchc
+#' @aliases gcc
 #' @keywords causal inference, genetic correlation
 #' 
-gchc <-
+gcc <-
 function(rg1.log = NULL, 
                 rg2.log = NULL, 
                 exposure.sumstats = NULL, 
