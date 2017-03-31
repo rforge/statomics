@@ -1,3 +1,3 @@
 importFrom("stats", "cor", "pchisq", "runif")
   importFrom("utils", "read.table")
-export("gchc","print.heading")
+export("gcc","print.heading")
