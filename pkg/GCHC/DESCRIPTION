@@ -1,8 +1,8 @@
-Package: GCC
+Package: G3C
 Type: Package
-Title: Genetic Correlation heterogeneity test for Causality (GCC)
-Version: 1.1
-Date: 2017-03-31
+Title: Genetic Correlation Contrast test for Causality (GCC)
+Version: 1.1-2
+Date: 2017-08-21
 Author: Xia Shen
 Maintainer: Xia Shen <xia.shen@ed.ac.uk>
 Description: Testing the difference between genetic correlation estimates reported by LD Score regression (LDSC), to infer causality.
