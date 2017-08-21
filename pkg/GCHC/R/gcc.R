@@ -1,4 +1,4 @@
-#' Genetic Correlation heterogeneity test for Causality (GCC)
+#' Genetic Correlation Contrast test for Causality (G3C)
 #' 
 #' This function tests the difference between genetic correlation estimates 
 #' reported by LD Score regression (LDSC), to infer causality.
@@ -30,11 +30,11 @@
 #' for complex traits. \emph{Submitted}.
 #' 
 #' @seealso 
-#' GCC homepage: http://gcc.shen.se
+#' G3C homepage: http://github.com/xiashen/G3C
 #' 
 #' @examples 
 #' \dontrun{
-#' gchc(rg1.log = 'EDU_BMI1.log', 
+#' g3c(rg1.log = 'EDU_BMI1.log', 
 #'                 rg2.log = 'EDU_BMI2.log', 
 #'                 exposure.sumstats = 'EDU.sumstats.gz', 
 #'                 outcome.sumstats1 = 'BMI1.sumstats.gz',
@@ -42,10 +42,10 @@
 #'                 exposure = 'EA', 
 #'                 outcome = 'BMI')
 #' }
-#' @aliases gcc
+#' @aliases g3c
 #' @keywords causal inference, genetic correlation
 #' 
-gcc <-
+g3c <-
 function(rg1.log = NULL, 
                 rg2.log = NULL, 
                 exposure.sumstats = NULL, 
