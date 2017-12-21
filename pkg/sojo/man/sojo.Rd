@@ -9,12 +9,12 @@ sojo(sum.stat.raw, LD_ref, snp_ref, v.y = 1, lambda.vec = NA,
 }
 \arguments{
 \item{sum.stat.raw}{A data frame including GWAS summary statistics of genetic variants within a mapped locus. 
-The input data frame should include following columns: SNP, SNP ID; A1, effect allele; A2, reference allele; Freq1, the allele frequency of Allele1;
+The input data frame should include following columns: SNP, SNP ID; A1, effect allele; A2, reference allele;
 b, estimate of marginal effect in GWAS; se, standard error of the estimates of marginal effects in GWAS; N, sample size.}
 
-\item{LD_ref}{The reference LD correlation matrix including SNPs at the locus.}
+\item{LD_ref}{The reference LD correlation matrix including SNPs at the locus. The row names and column names of the matrix should be SNP names in reference sample.}
 
-\item{snp_ref}{The reference alleles of SNPs in the reference LD correlation matrix.}
+\item{snp_ref}{The reference alleles of SNPs in the reference LD correlation matrix. The names of the vector should be SNP names in reference sample.}
 
 \item{v.y}{The phenotypic variance of the trait. Default is 1.}
 
@@ -31,7 +31,8 @@ For example, if \code{nvar = 5}, then the algorithm will stop before the sixth v
 A list is returned with:
 \itemize{
 \item{lambda.v }{The tuning parameter sequence actually used.}
-\item{beta.mat }{The LASSO estimates at the tuning parameters in \code{lambda.v} stored in sparse matrix format.}
+\item{beta.mat }{The LASSO estimates at the tuning parameters in \code{lambda.v} stored in sparse matrix format. The reference alleles in results are same as those in the provided GWAS summary statistics data frame.}
+\item{selected.markers }{The vector of selected variants. The variants being ahead are selected earlier in LASSO path.}
 }
 }
 \description{

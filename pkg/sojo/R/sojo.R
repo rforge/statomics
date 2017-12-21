@@ -4,10 +4,10 @@
 #'  based on LASSO regression derived from GWAS summary statistics. 
 #' 
 #' @param sum.stat.raw A data frame including GWAS summary statistics of genetic variants within a mapped locus. 
-#' The input data frame should include following columns: SNP, SNP ID; A1, effect allele; A2, reference allele; Freq1, the allele frequency of Allele1;
+#' The input data frame should include following columns: SNP, SNP ID; A1, effect allele; A2, reference allele;
 #' b, estimate of marginal effect in GWAS; se, standard error of the estimates of marginal effects in GWAS; N, sample size.
-#' @param LD_ref The reference LD correlation matrix including SNPs at the locus. 
-#' @param snp_ref The reference alleles of SNPs in the reference LD correlation matrix. 
+#' @param LD_ref The reference LD correlation matrix including SNPs at the locus. The row names and column names of the matrix should be SNP names in reference sample.
+#' @param snp_ref The reference alleles of SNPs in the reference LD correlation matrix. The names of the vector should be SNP names in reference sample.
 #' @param v.y The phenotypic variance of the trait. Default is 1.
 #' @param lambda.vec The tuning parameter sequence given by user. If not specified, the function will compute its own tuning parameter sequence
 #' ,which is recommended.
@@ -28,7 +28,8 @@
 #' @return A list is returned with:
 #' \itemize{
 #' \item{lambda.v }{The tuning parameter sequence actually used.}
-#' \item{beta.mat }{The LASSO estimates at the tuning parameters in \code{lambda.v} stored in sparse matrix format.}
+#' \item{beta.mat }{The LASSO estimates at the tuning parameters in \code{lambda.v} stored in sparse matrix format. The reference alleles in results are same as those in the provided GWAS summary statistics data frame.}
+#' \item{selected.markers }{The vector of selected variants. The variants being ahead are selected earlier in LASSO path.}
 #' }
 #' 
 #' @author Zheng Ning
@@ -66,8 +67,9 @@
 sojo <- 
   function(sum.stat.raw, LD_ref, snp_ref, v.y=1, lambda.vec=NA, standardize = T, nvar = 50){
     
-    colnames_input <- c("SNP", "A1", "A2", "Freq1","b", "se", "N")
+    colnames_input <- c("SNP", "A1", "A2","b", "se", "N")
     colnames_lack <- setdiff(colnames_input, intersect(colnames(sum.stat.raw), colnames_input))
+    
     
     if(length(colnames_lack) > 0){
       colnames_lack <- paste(colnames_lack, collapse = ', ')
@@ -93,28 +95,27 @@ sojo <-
     LD_mat_save[lower.tri(LD_mat_save,diag = T)] <- 0
     cov_X <- LD_mat_save + t(LD_mat_save)
     diag(cov_X) <- 1
-    
-    
+    rownames(cov_X) <- colnames(cov_X) <- array.snp
     snp_ref_twge <- snp_ref[array.snp]
+    
+    
     index <- sum.stat$A2 != snp_ref_twge
-    
-    
     tmp <- sum.stat$A1[index]
     sum.stat$A1[index] <- sum.stat$A2[index]
     sum.stat$A2[index] <- tmp
-    sum.stat$Freq1.Hapmap[index] <- 1 - sum.stat$Freq1.Hapmap[index]
     sum.stat$b[index] <- -sum.stat$b[index]
+    
     
     betas_meta <-  sum.stat$b
     betas_se <-  sum.stat$se
-    freq <-  sum.stat$Freq1
     n.vec <- sum.stat$N
     
     p <- length(betas_meta)
-    var.X <- 2*freq*(1-freq)
+    var.X <- v.y / n.vec / betas_se^2
     if(standardize == T){
       B <- cov_X
-      Xy <- betas_meta * v.y / betas_se^2 / sqrt(var.X) / n.vec
+      #Xy <- betas_meta * v.y / betas_se^2 / sqrt(var.X) / n.vec
+      Xy <- betas_meta * sqrt(v.y) / betas_se / sqrt(n.vec)
     }else{
       B <- diag(sqrt(var.X)) %*% cov_X %*% diag(sqrt(var.X))
       Xy <- betas_meta * v.y / betas_se^2 / n.vec
@@ -162,8 +163,12 @@ sojo <-
       
       cross_all <- (XaXa_inv %*% Xy[A]) / (XaXa_inv %*% sA)
       
-      cross <- max(cross_all[which(cross_all < lambda - 1e-10)])
-      #cross <- -Inf
+      ind_cross <- which(cross_all < lambda - 1e-10)
+      if(length(ind_cross) == 0){
+        cross <- -Inf
+      } else{
+        cross <- max(cross_all[ind_cross])
+      }
       ind2 <- which(cross_all == cross)
       
       # Update lambda
@@ -208,8 +213,10 @@ sojo <-
       beta.mat <- diag(1 / sqrt(var.X)) %*% beta.mat 
     }
     if(is.na(lambda.vec)){
+      beta.mat <- diag(1 - index*2, nrow = length(index)) %*% beta.mat
       rownames(beta.mat) <- rownames(cov_X)
-      return(list(lambda.v = lambda.v, beta.mat = Matrix(beta.mat,sparse = TRUE)))
+      selected.markers <- rownames(beta.mat)[A]
+      return(list(lambda.v = lambda.v, beta.mat = Matrix(beta.mat,sparse = TRUE), selected.markers = selected.markers[1:nvar]))
     }
     
     
@@ -227,12 +234,12 @@ sojo <-
       return(beta)
     }
     if(min(lambda.vec)< min(lambda.v))
-      stop(paste("More than", nvar, "variants will be selected. Please set a larger nvar."))
+      stop(paste("Too many variants will be selected. Please set a larger nvar or a larger lambda."))
     bm <- matrix(0,p,length(lambda.vec))
     for(i in 1:length(lambda.vec)){
       bm[,i] <- lap(lambda.vec[i])
     }
-    
+    bm <- diag(1 - index*2, nrow = length(index)) %*% bm
     rownames(bm) <- rownames(cov_X)
     return(list(lambda.v = lambda.vec, beta.mat = Matrix(bm,sparse = TRUE)))
   }
