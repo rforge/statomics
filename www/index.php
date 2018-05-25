@@ -8,7 +8,7 @@ $domain=ereg_replace('[^\.]*\.(.*)$','\1',$_SERVER['HTTP_HOST']);
 $group_name=ereg_replace('([^\.]*)\..*$','\1',$_SERVER['HTTP_HOST']);
 $themeroot='r-forge.r-project.org/themes/rforge/';
 
-echo '<?xml version="1.0" encoding="UTF-8"?>';
+echo '<?xml version="1.1" encoding="UTF-8"?>';
 ?>
 <!DOCTYPE html
 	PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"

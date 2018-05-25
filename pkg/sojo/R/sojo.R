@@ -243,4 +243,4 @@ sojo <-
     rownames(bm) <- rownames(cov_X)
     return(list(lambda.v = lambda.vec, beta.mat = Matrix(bm,sparse = TRUE)))
   }
-### test
+### test 2
