@@ -3,7 +3,7 @@
 #' This function computes penalized Selection Operator for JOintly analyzing multiple variants (SOJO) within a mapped locus,
 #'  based on LASSO regression derived from GWAS summary statistics. 
 #' 
-#' @param sum.stat.raw A data frame including GWAS summary statistics of genetic variants within a mapped locus. 
+#' @param sum.stat.discovery A data frame including GWAS summary statistics of genetic variants within a mapped locus. 
 #' The input data frame should include following columns: SNP, SNP ID; A1, effect allele; A2, reference allele;
 #' b, estimate of marginal effect in GWAS; se, standard error of the estimates of marginal effects in GWAS; N, sample size.
 #' @param LD_ref The reference LD correlation matrix including SNPs at the locus. The row names and column names of the matrix should be SNP names in reference sample.
@@ -28,7 +28,7 @@
 #' @return A list is returned with:
 #' \itemize{
 #' \item{lambda.v }{The tuning parameter sequence actually used.}
-#' \item{beta.mat }{The LASSO estimates at the tuning parameters in \code{lambda.v} stored in sparse matrix format. The reference alleles in results are same as those in the provided GWAS summary statistics data frame.}
+#' \item{beta.mat }{The LASSO estimates at the tuning parameters in \code{lambda.v} stored in sparse matrix format. The reference alleles in results are same as those in the discovery gwas results.}
 #' \item{selected.markers }{The vector of selected variants. The variants being ahead are selected earlier in LASSO path.}
 #' }
 #' 
@@ -45,30 +45,30 @@
 #' @examples 
 #'\dontrun{
 #' ## The GWAS summary statistics of SNPs in 1 MB window centred at rs11090631 
-#' data(sum.stat.raw)
-#' head(sum.stat.raw)
+#' data(sum.stat.discovery)
+#' head(sum.stat.discovery)
 #' 
 #' ## The reference matrix and corresponding reference alleles 
 #' download.file("https://www.dropbox.com/s/ty1udfhx5ohauh8/LD_chr22.rda?raw=1", destfile = paste0(find.package('sojo'), "example.rda"))
 #' load(file = paste0(find.package('sojo'), "example.rda"))
 #' 
-#' res <- sojo(sum.stat.raw, LD_ref = LD_mat, snp_ref = snp_ref, nvar = 20)
+#' res <- sojo(sum.stat.discovery, LD_ref = LD_mat, snp_ref = snp_ref, nvar = 20)
 #' 
 #' ## LASSO path plot
 #' matplot(log(res$lambda.v), t(as.matrix(res$beta.mat)), lty = 1, type = "l", xlab = expression(paste(log, " ",lambda)), 
 #' ylab = "Coefficients", main = "Summary-level LASSO")
 #' 
 #' ## LASSO solution for user supplied tuning parameters
-#' res2 <- sojo(sum.stat.raw = sum.stat.raw, LD_ref = LD_mat, snp_ref = snp_ref, lambda.vec = c(0.004,0.002))
+#' res2 <- sojo(sum.stat.discovery = sum.stat.discovery, LD_ref = LD_mat, snp_ref = snp_ref, lambda.vec = c(0.004,0.002))
 #' }
 #' 
 #' @export
 #' 
 sojo <- 
-  function(sum.stat.raw, LD_ref, snp_ref, v.y=1, lambda.vec=NA, standardize = T, nvar = 50){
+  function(sum.stat.discovery, sum.stat.validation = NULL, LD_ref, snp_ref, v.y=1, lambda.vec=NA, standardize = T, nvar = 50){
     
     colnames_input <- c("SNP", "A1", "A2","b", "se", "N")
-    colnames_lack <- setdiff(colnames_input, intersect(colnames(sum.stat.raw), colnames_input))
+    colnames_lack <- setdiff(colnames_input, intersect(colnames(sum.stat.discovery), colnames_input))
     
     
     if(length(colnames_lack) > 0){
@@ -77,34 +77,47 @@ sojo <-
     }
     
     if(ncol(LD_ref) != length(snp_ref)){
-      stop("The SNPs in reference LD matrix and reference allele vector does't match! Please check.")
+      stop("The SNPs in reference LD matrix and its reference allele vector does't match! Please check.")
     }
     
     
     rownames(LD_ref) <- colnames(LD_ref) <- names(snp_ref)
-    array.snp <- intersect(sum.stat.raw$SNP,names(snp_ref))
-    if(length(array.snp) == 0){
-      stop("There is no overlapping SNPs between summary statistics and reference LD matrix! Please check.")
-    }
-    rownames(sum.stat.raw) <- sum.stat.raw$SNP
-    sum.stat <- sum.stat.raw[array.snp,]
     
-    ##### Map reference allele #####
+    if(sum.stat.validation == NULL){
+      array.snp <- intersect(sum.stat.discovery$SNP,names(snp_ref))
+      if(length(array.snp) == 0){
+        stop("There is no overlapping SNPs between summary statistics and reference LD matrix! Please check.")
+      }
+      rownames(sum.stat.discovery) <- sum.stat.discovery$SNP
+      sum.stat <- sum.stat.discovery[array.snp,]
+    } else{
+      array.snp <- intersect(intersect(sum.stat.discovery$SNP,names(snp_ref)),sum.stat.valid$SNP)
+      if(length(array.snp) == 0){
+        stop("There is no overlapping SNPs between discovery sample, validation sample and reference sample! Please check.")
+      }
+      rownames(sum.stat.discovery) <- sum.stat.discovery$SNP
+      rownames(sum.stat.validation) <- sum.stat.validation$SNP
+      sum.stat <- sum.stat.discovery[array.snp,]
+      sum.stat.valid <- sum.stat.validation[array.snp,]
+    }
+    
+
+    
+    ##### Map reference allele (follow LD_ref at here, change back to ref in discovery sample at the end)#####
     
     LD_mat_save <- LD_ref[array.snp,array.snp]
     LD_mat_save[lower.tri(LD_mat_save,diag = T)] <- 0
-    cov_X <- LD_mat_save + t(LD_mat_save)
-    diag(cov_X) <- 1
-    rownames(cov_X) <- colnames(cov_X) <- array.snp
-    snp_ref_twge <- snp_ref[array.snp]
+    LD_use <- LD_mat_save + t(LD_mat_save)
+    diag(LD_use) <- 1
+    rownames(LD_use) <- colnames(LD_use) <- array.snp
+    snp_ref_use <- snp_ref[array.snp]
     
     
-    index <- sum.stat$A2 != snp_ref_twge
+    index <- sum.stat$A2 != snp_ref_use
     tmp <- sum.stat$A1[index]
     sum.stat$A1[index] <- sum.stat$A2[index]
     sum.stat$A2[index] <- tmp
     sum.stat$b[index] <- -sum.stat$b[index]
-    
     
     betas_meta <-  sum.stat$b
     betas_se <-  sum.stat$se
@@ -113,11 +126,11 @@ sojo <-
     p <- length(betas_meta)
     var.X <- v.y / n.vec / betas_se^2
     if(standardize == T){
-      B <- cov_X
+      B <- LD_use
       #Xy <- betas_meta * v.y / betas_se^2 / sqrt(var.X) / n.vec
       Xy <- betas_meta * sqrt(v.y) / betas_se / sqrt(n.vec)
     }else{
-      B <- diag(sqrt(var.X)) %*% cov_X %*% diag(sqrt(var.X))
+      B <- diag(sqrt(var.X)) %*% LD_use %*% diag(sqrt(var.X))
       Xy <- betas_meta * v.y / betas_se^2 / n.vec
     }
     
@@ -212,9 +225,30 @@ sojo <-
     if(standardize == T){
       beta.mat <- diag(1 / sqrt(var.X)) %*% beta.mat 
     }
+    
+    ##### Use validation set to select optimum lambda #####
+    
+    if(sum.stat.validation != NULL){
+      r2_sum <- function(beta_est, b_uni, se_uni, LD_ref, var.X, N){
+        cov.y_hat.y <- crossprod(var.X * b_uni, beta_est)  ## cov(Xb_hat, y)
+        var.y_hat <- t(sqrt(var.X) * beta_est) %*% LD_ref %*% (sqrt(var.X) * beta_est)  ## var(y_hat)
+        var.y <- median(N*var.X*se_uni^2)  # var(y)
+        return(cov.y_hat.y^2 / var.y_hat / var.y)
+      }
+      
+      index2 <- sum.stat.valid$A2 != snp_ref_use
+      sum.stat.valid$b[index2] <- -sum.stat.valid$b[index2]
+      var.X.valid <- 2*sum.stat.valid$Freq1*(1-sum.stat.valid$Freq1)
+      
+      R2 <- ncol(beta.mat)
+      for(i in 1:ncol(beta.mat)){
+        R2[i] <- r2_sum(beta_est=beta.mat[,i], b_uni=sum.stat.valid$b, se_uni=sum.stat.valid$se, LD_ref=LD_use, var.X=var.X.valid, N=sum.stat.valid$N)
+      }
+    }
+    
     if(is.na(lambda.vec)){
       beta.mat <- diag(1 - index*2, nrow = length(index)) %*% beta.mat
-      rownames(beta.mat) <- rownames(cov_X)
+      rownames(beta.mat) <- rownames(LD_use)
       selected.markers <- rownames(beta.mat)[A]
       return(list(lambda.v = lambda.v, beta.mat = Matrix(beta.mat,sparse = TRUE), selected.markers = selected.markers[1:nvar]))
     }
@@ -240,7 +274,7 @@ sojo <-
       bm[,i] <- lap(lambda.vec[i])
     }
     bm <- diag(1 - index*2, nrow = length(index)) %*% bm
-    rownames(bm) <- rownames(cov_X)
+    rownames(bm) <- rownames(LD_use)
     return(list(lambda.v = lambda.vec, beta.mat = Matrix(bm,sparse = TRUE)))
   }
-### test 2
+### test 22

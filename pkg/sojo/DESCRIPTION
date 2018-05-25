@@ -1,7 +1,7 @@
 Package: sojo
 Type: Package
 Title: Selection Operator for Jointly analyzing multiple variants (SOJO)
-Version: 1.0
+Version: 2.0
 Date: 2017-05-18
 Author: Zheng Ning
 Maintainer: Zheng Ning <zheng.ning@ki.se>
