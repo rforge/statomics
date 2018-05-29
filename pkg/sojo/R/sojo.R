@@ -114,7 +114,7 @@ sojo <-
       rownames(sum.stat.discovery) <- sum.stat.discovery$SNP
       sum.stat <- sum.stat.discovery[snps.overlap,]
     } else{
-      snps.overlap <- intersect(intersect(sum.stat.discovery$SNP,names(snp_ref)),sum.stat.valid$SNP)
+      snps.overlap <- intersect(intersect(sum.stat.discovery$SNP,names(snp_ref)),sum.stat.validation$SNP)
       if(length(snps.overlap) == 0){
         stop("There is no overlapping SNPs between discovery sample, validation sample and reference sample! Please check.")
       }
@@ -263,8 +263,8 @@ sojo <-
       sum.stat.valid$b[index2] <- -sum.stat.valid$b[index2]
       var.X.valid <- 2*sum.stat.valid$Freq1*(1-sum.stat.valid$Freq1)
       
-      R2 <- ncol(beta.mat)
-      for(i in 1:ncol(beta.mat)){
+      R2 <- numeric(ncol(beta.mat))
+      for(i in 2:ncol(beta.mat)){
         R2[i] <- r2_sum(beta_est=beta.mat[,i], b_uni=sum.stat.valid$b, se_uni=sum.stat.valid$se, LD_ref=LD_use, var.X=var.X.valid, N=sum.stat.valid$N)
       }
 
