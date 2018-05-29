@@ -77,6 +77,9 @@
 #' 
 #' 
 #' ## LASSO solution and the optimal tuning parameter when validation dataset is available
+#' data(sum.stat.validation)
+#' head(sum.stat.validation)
+#' 
 #' res.valid <- sojo(sum.stat.discovery, sum.stat.validation = sum.stat.validation, LD_ref = LD_mat, snp_ref = snp_ref, nvar = 20)
 #' res.valid$beta.opt  # the optimal variants and their effect sizes
 #' res.valid$lambda.opt  # the optimal tuning parameter

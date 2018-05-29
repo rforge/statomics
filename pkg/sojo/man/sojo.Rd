@@ -4,13 +4,16 @@
 \alias{sojo}
 \title{Selection Operator for Jointly analyzing multiple variants (SOJO)}
 \usage{
-sojo(sum.stat.raw, LD_ref, snp_ref, v.y = 1, lambda.vec = NA,
-  standardize = T, nvar = 50)
+sojo(sum.stat.discovery, sum.stat.validation = NULL, LD_ref, snp_ref,
+  v.y = 1, lambda.vec = NA, standardize = T, nvar = 50)
 }
 \arguments{
-\item{sum.stat.raw}{A data frame including GWAS summary statistics of genetic variants within a mapped locus. 
+\item{sum.stat.discovery}{A data frame including GWAS summary statistics of genetic variants within a mapped locus. 
 The input data frame should include following columns: SNP, SNP ID; A1, effect allele; A2, reference allele;
 b, estimate of marginal effect in GWAS; se, standard error of the estimates of marginal effects in GWAS; N, sample size.}
+
+\item{sum.stat.validation}{A data frame including GWAS summary statistics from a validation dataset. It should include following columns: SNP, SNP ID; A1, effect allele; A2, reference allele;
+Freq1, the allele frequency of Allele1; b, estimate of marginal effect in GWAS; se, standard error of the estimates of marginal effects in GWAS; N, sample size.}
 
 \item{LD_ref}{The reference LD correlation matrix including SNPs at the locus. The row names and column names of the matrix should be SNP names in reference sample.}
 
@@ -24,14 +27,18 @@ b, estimate of marginal effect in GWAS; se, standard error of the estimates of m
 \item{standardize}{Logical value for genotypic data standardization, prior to starting the algorithm. 
 The coefficients in output are always transformed back to the original scale. Default is \code{standardize = TRUE}.}
 
-\item{nvar}{The number of variants aiming to be selected in the model. 
+\item{nvar}{The number of variants aiming to be selected in the model. If \code{sum.stat.validation} is provided, \code{nvar} is the maximum number
+of variants in the model.
 For example, if \code{nvar = 5}, then the algorithm will stop before the sixth variant is selected. Default is 50.}
 }
 \value{
 A list is returned with:
 \itemize{
+\item{beta.opt }{The optimal variants and their effect sizes in terms of out of sample R^2. Only available when \code{sum.stat.validation} is provided.}
+\item{lambda.opt }{The optimal tuning parameter in terms of out of sample R^2. Only available when \code{sum.stat.validation} is provided.}
+\item{R2 }{The out of sample R^2 for each tuning parameter in \code{lambda.v}. Only available when \code{sum.stat.validation} is provided.}
 \item{lambda.v }{The tuning parameter sequence actually used.}
-\item{beta.mat }{The LASSO estimates at the tuning parameters in \code{lambda.v} stored in sparse matrix format. The reference alleles in results are same as those in the provided GWAS summary statistics data frame.}
+\item{beta.mat }{The LASSO estimates at the tuning parameters in \code{lambda.v} stored in sparse matrix format. The reference alleles in results are same as those in the discovery gwas results.}
 \item{selected.markers }{The vector of selected variants. The variants being ahead are selected earlier in LASSO path.}
 }
 }
@@ -41,7 +48,15 @@ This function computes penalized Selection Operator for JOintly analyzing multip
 }
 \note{
 Users can download reference LD correlation matrices from https://www.dropbox.com/home/sojo\%20reference\%20ld\%20matrix. 
-These LD matrices are based on 612,513 chip markers in Swedish Twin Registry. The function will then take overlapping SNPs between summary statistics and reference LD matrix. 
+These LD matrices are based on 612,513 chip markers in Swedish Twin Registry. If chip markers are only a small subset of the analysis, LD matrix from the 1000 Genomes Project
+can be used (see the GitHub tutorial). The function will then take overlapping SNPs between summary statistics and reference LD matrix. 
+
+The function returns results along the whole LASSO path when tuning parameter changes. Users can specify several tunining parameters or how many variants
+should be selected.    
+
+The optimal tuning parameter can be suggested by validation. If the GWAS summary statistics from a validation dataset are provided in \code{sum.stat.validation}, then the out of sample R^2 for each tuning parameter in \code{lambda.v} 
+will be computed. The tuning parameter gives the largest out of sample R^2 will be considered as optimal. The optimal tuning parameter and the variants and their effect sizes
+at this tuning parameter will be reported in \code{beta.opt} and \code{lambda.opt}.
 
 When a tiny \code{lambda.vec} is specified, the LASSO solution is similar to the standard multiple regression, 
 which may cause error due to complete LD between variants. 
@@ -52,23 +67,32 @@ added into or removed from the model.
 \examples{
 \dontrun{
 ## The GWAS summary statistics of SNPs in 1 MB window centred at rs11090631 
-data(sum.stat.raw)
-head(sum.stat.raw)
+data(sum.stat.discovery)
+head(sum.stat.discovery)
 
 ## The reference matrix and corresponding reference alleles 
 download.file("https://www.dropbox.com/s/ty1udfhx5ohauh8/LD_chr22.rda?raw=1", destfile = paste0(find.package('sojo'), "example.rda"))
 load(file = paste0(find.package('sojo'), "example.rda"))
 
-res <- sojo(sum.stat.raw, LD_ref = LD_mat, snp_ref = snp_ref, nvar = 20)
+res <- sojo(sum.stat.discovery, LD_ref = LD_mat, snp_ref = snp_ref, nvar = 20)
 
 ## LASSO path plot
 matplot(log(res$lambda.v), t(as.matrix(res$beta.mat)), lty = 1, type = "l", xlab = expression(paste(log, " ",lambda)), 
 ylab = "Coefficients", main = "Summary-level LASSO")
 
 ## LASSO solution for user supplied tuning parameters
-res2 <- sojo(sum.stat.raw = sum.stat.raw, LD_ref = LD_mat, snp_ref = snp_ref, lambda.vec = c(0.004,0.002))
-}
+res2 <- sojo(sum.stat.discovery = sum.stat.discovery, LD_ref = LD_mat, snp_ref = snp_ref, lambda.vec = c(0.004,0.002))
 
+
+## LASSO solution and the optimal tuning parameter when validation dataset is available
+data(sum.stat.validation)
+head(sum.stat.validation)
+
+res.valid <- sojo(sum.stat.discovery, sum.stat.validation = sum.stat.validation, LD_ref = LD_mat, snp_ref = snp_ref, nvar = 20)
+res.valid$beta.opt  # the optimal variants and their effect sizes
+res.valid$lambda.opt  # the optimal tuning parameter
+res.valid$R2  # out of sample R^2
+}
 }
 \references{
 Ning Z, Lee Y, Joshi PK, Wilson JF, Pawitan Y, Shen X (2017). A selection operator for summary association statistics 
