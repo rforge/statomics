@@ -6,6 +6,8 @@
 #' @param sum.stat.discovery A data frame including GWAS summary statistics of genetic variants within a mapped locus. 
 #' The input data frame should include following columns: SNP, SNP ID; A1, effect allele; A2, reference allele;
 #' b, estimate of marginal effect in GWAS; se, standard error of the estimates of marginal effects in GWAS; N, sample size.
+#' @param sum.stat.validation A data frame including GWAS summary statistics from a validation dataset. It should include following columns: SNP, SNP ID; A1, effect allele; A2, reference allele;
+#' Freq1, the allele frequency of Allele1; b, estimate of marginal effect in GWAS; se, standard error of the estimates of marginal effects in GWAS; N, sample size.
 #' @param LD_ref The reference LD correlation matrix including SNPs at the locus. The row names and column names of the matrix should be SNP names in reference sample.
 #' @param snp_ref The reference alleles of SNPs in the reference LD correlation matrix. The names of the vector should be SNP names in reference sample.
 #' @param v.y The phenotypic variance of the trait. Default is 1.
@@ -13,11 +15,20 @@
 #' ,which is recommended.
 #' @param standardize Logical value for genotypic data standardization, prior to starting the algorithm. 
 #' The coefficients in output are always transformed back to the original scale. Default is \code{standardize = TRUE}.
-#' @param nvar The number of variants aiming to be selected in the model. 
+#' @param nvar The number of variants aiming to be selected in the model. If \code{sum.stat.validation} is provided, \code{nvar} is the maximum number
+#' of variants in the model.
 #' For example, if \code{nvar = 5}, then the algorithm will stop before the sixth variant is selected. Default is 50.
 #' 
 #' @note Users can download reference LD correlation matrices from https://www.dropbox.com/home/sojo\%20reference\%20ld\%20matrix. 
-#' These LD matrices are based on 612,513 chip markers in Swedish Twin Registry. The function will then take overlapping SNPs between summary statistics and reference LD matrix. 
+#' These LD matrices are based on 612,513 chip markers in Swedish Twin Registry. If chip markers are only a small subset of the analysis, LD matrix from the 1000 Genomes Project
+#' can be used (see the GitHub tutorial). The function will then take overlapping SNPs between summary statistics and reference LD matrix. 
+#' 
+#' The function returns results along the whole LASSO path when tuning parameter changes. Users can specify several tunining parameters or how many variants
+#' should be selected.    
+#' 
+#' The optimal tuning parameter can be suggested by validation. If the GWAS summary statistics from a validation dataset are provided in \code{sum.stat.validation}, then the out of sample R^2 for each tuning parameter in \code{lambda.v} 
+#' will be computed. The tuning parameter gives the largest out of sample R^2 will be considered as optimal. The optimal tuning parameter and the variants and their effect sizes
+#' at this tuning parameter will be reported in \code{beta.opt} and \code{lambda.opt}.
 #' 
 #' When a tiny \code{lambda.vec} is specified, the LASSO solution is similar to the standard multiple regression, 
 #' which may cause error due to complete LD between variants. 
@@ -27,6 +38,9 @@
 #' 
 #' @return A list is returned with:
 #' \itemize{
+#' \item{beta.opt }{The optimal variants and their effect sizes in terms of out of sample R^2. Only available when \code{sum.stat.validation} is provided.}
+#' \item{lambda.opt }{The optimal tuning parameter in terms of out of sample R^2. Only available when \code{sum.stat.validation} is provided.}
+#' \item{R2 }{The out of sample R^2 for each tuning parameter in \code{lambda.v}. Only available when \code{sum.stat.validation} is provided.}
 #' \item{lambda.v }{The tuning parameter sequence actually used.}
 #' \item{beta.mat }{The LASSO estimates at the tuning parameters in \code{lambda.v} stored in sparse matrix format. The reference alleles in results are same as those in the discovery gwas results.}
 #' \item{selected.markers }{The vector of selected variants. The variants being ahead are selected earlier in LASSO path.}
@@ -60,8 +74,14 @@
 #' 
 #' ## LASSO solution for user supplied tuning parameters
 #' res2 <- sojo(sum.stat.discovery = sum.stat.discovery, LD_ref = LD_mat, snp_ref = snp_ref, lambda.vec = c(0.004,0.002))
-#' }
 #' 
+#' 
+#' ## LASSO solution and the optimal tuning parameter when validation dataset is available
+#' res.valid <- sojo(sum.stat.discovery, sum.stat.validation = sum.stat.validation, LD_ref = LD_mat, snp_ref = snp_ref, nvar = 20)
+#' res.valid$beta.opt  # the optimal variants and their effect sizes
+#' res.valid$lambda.opt  # the optimal tuning parameter
+#' res.valid$R2  # out of sample R^2
+#' }
 #' @export
 #' 
 sojo <- 
@@ -83,34 +103,34 @@ sojo <-
     
     rownames(LD_ref) <- colnames(LD_ref) <- names(snp_ref)
     
-    if(sum.stat.validation == NULL){
-      array.snp <- intersect(sum.stat.discovery$SNP,names(snp_ref))
-      if(length(array.snp) == 0){
+    if(is.null(sum.stat.validation)){
+      snps.overlap <- intersect(sum.stat.discovery$SNP,names(snp_ref))
+      if(length(snps.overlap) == 0){
         stop("There is no overlapping SNPs between summary statistics and reference LD matrix! Please check.")
       }
       rownames(sum.stat.discovery) <- sum.stat.discovery$SNP
-      sum.stat <- sum.stat.discovery[array.snp,]
+      sum.stat <- sum.stat.discovery[snps.overlap,]
     } else{
-      array.snp <- intersect(intersect(sum.stat.discovery$SNP,names(snp_ref)),sum.stat.valid$SNP)
-      if(length(array.snp) == 0){
+      snps.overlap <- intersect(intersect(sum.stat.discovery$SNP,names(snp_ref)),sum.stat.valid$SNP)
+      if(length(snps.overlap) == 0){
         stop("There is no overlapping SNPs between discovery sample, validation sample and reference sample! Please check.")
       }
       rownames(sum.stat.discovery) <- sum.stat.discovery$SNP
       rownames(sum.stat.validation) <- sum.stat.validation$SNP
-      sum.stat <- sum.stat.discovery[array.snp,]
-      sum.stat.valid <- sum.stat.validation[array.snp,]
+      sum.stat <- sum.stat.discovery[snps.overlap,]
+      sum.stat.valid <- sum.stat.validation[snps.overlap,]
     }
     
 
     
     ##### Map reference allele (follow LD_ref at here, change back to ref in discovery sample at the end)#####
     
-    LD_mat_save <- LD_ref[array.snp,array.snp]
+    LD_mat_save <- LD_ref[snps.overlap,snps.overlap]
     LD_mat_save[lower.tri(LD_mat_save,diag = T)] <- 0
     LD_use <- LD_mat_save + t(LD_mat_save)
     diag(LD_use) <- 1
-    rownames(LD_use) <- colnames(LD_use) <- array.snp
-    snp_ref_use <- snp_ref[array.snp]
+    rownames(LD_use) <- colnames(LD_use) <- snps.overlap
+    snp_ref_use <- snp_ref[snps.overlap]
     
     
     index <- sum.stat$A2 != snp_ref_use
@@ -228,7 +248,7 @@ sojo <-
     
     ##### Use validation set to select optimum lambda #####
     
-    if(sum.stat.validation != NULL){
+    if(!is.null(sum.stat.validation)){
       r2_sum <- function(beta_est, b_uni, se_uni, LD_ref, var.X, N){
         cov.y_hat.y <- crossprod(var.X * b_uni, beta_est)  ## cov(Xb_hat, y)
         var.y_hat <- t(sqrt(var.X) * beta_est) %*% LD_ref %*% (sqrt(var.X) * beta_est)  ## var(y_hat)
@@ -244,13 +264,21 @@ sojo <-
       for(i in 1:ncol(beta.mat)){
         R2[i] <- r2_sum(beta_est=beta.mat[,i], b_uni=sum.stat.valid$b, se_uni=sum.stat.valid$se, LD_ref=LD_use, var.X=var.X.valid, N=sum.stat.valid$N)
       }
+
     }
     
     if(is.na(lambda.vec)){
       beta.mat <- diag(1 - index*2, nrow = length(index)) %*% beta.mat
       rownames(beta.mat) <- rownames(LD_use)
       selected.markers <- rownames(beta.mat)[A]
-      return(list(lambda.v = lambda.v, beta.mat = Matrix(beta.mat,sparse = TRUE), selected.markers = selected.markers[1:nvar]))
+      if(is.null(sum.stat.validation)){
+        return(list(lambda.v = lambda.v, beta.mat = Matrix(beta.mat,sparse = TRUE), selected.markers = selected.markers[1:nvar]))
+      } else{
+        lambda.opt <- lambda.v[which.max(R2)]
+        snps.opt <- which(abs(beta.mat[,which.max(R2)]) > 1e-10)
+        beta.opt <- beta.mat[snps.opt,which.max(R2)]
+        return(list(beta.opt = beta.opt, lambda.opt = lambda.opt, R2 = R2, lambda.v = lambda.v, beta.mat = Matrix(beta.mat,sparse = TRUE), selected.markers = selected.markers[1:nvar]))
+      }
     }
     
     
@@ -277,4 +305,3 @@ sojo <-
     rownames(bm) <- rownames(LD_use)
     return(list(lambda.v = lambda.vec, beta.mat = Matrix(bm,sparse = TRUE)))
   }
-### test 22
