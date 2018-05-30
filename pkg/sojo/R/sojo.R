@@ -73,7 +73,7 @@
 #' ylab = "Coefficients", main = "Summary-level LASSO")
 #' 
 #' ## LASSO solution for user supplied tuning parameters
-#' res2 <- sojo(sum.stat.discovery = sum.stat.discovery, LD_ref = LD_mat, snp_ref = snp_ref, lambda.vec = c(0.004,0.002))
+#' res2 <- sojo(sum.stat.discovery = sum.stat.discovery, LD_ref = LD_mat, snp_ref = snp_ref, lambda.vec = c(0.006,0.004))
 #' 
 #' 
 #' ## LASSO solution and the optimal tuning parameter when validation dataset is available
@@ -84,6 +84,10 @@
 #' res.valid$beta.opt  # the optimal variants and their effect sizes
 #' res.valid$lambda.opt  # the optimal tuning parameter
 #' res.valid$R2  # out of sample R^2
+#' 
+#' plot(res.valid$R2,type = "l")  # R^2 for different tuning parameters
+#' points(res.valid$R2, pch = 20)
+#' abline(v = which.max(res.valid$R2),lty="dashed",col="red")  # the optimal tuning paramter picked by optimizing predicted R^2
 #' }
 #' @export
 #' 
